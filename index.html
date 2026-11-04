@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ANIMAL MOTION STUDY</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 1920 x 1080 기준 포스터 무대 (script.js가 브라우저 크기에 맞춰 축소/확대) -->
+  <main class="stage" id="stage">
+
+    <!-- 상단 바 -->
+    <header class="top reveal" style="--d: 0.1s">
+      <p>INTERACTIVE WEB EXPERIMENT / 2026</p>
+      <p>NO. 01 — FOX</p>
+    </header>
+
+    <!-- 배경에서 천천히 떠다니는 작은 점들 (script.js가 만들어 줌) -->
+    <div class="field" id="field" aria-hidden="true"></div>
+
+    <!-- 메인 그래픽 -->
+    <section class="graphic" aria-label="Motion graphic: three circles">
+      <div class="axis" aria-hidden="true"></div>
+
+      <!-- 슬롯 1: PULSE -->
+      <div class="slot">
+        <div class="circle-move" role="button" tabindex="0" aria-label="Circle 1, pulse">
+          <div class="circle c-pulse"><span class="dot"></span></div>
+        </div>
+      </div>
+
+      <!-- 슬롯 2: FLOAT -->
+      <div class="slot">
+        <div class="circle-move" role="button" tabindex="0" aria-label="Circle 2, float">
+          <div class="circle c-float"><span class="dot"></span></div>
+        </div>
+      </div>
+
+      <!-- 슬롯 3: DRIFT -->
+      <div class="slot">
+        <div class="circle-move" role="button" tabindex="0" aria-label="Circle 3, drift">
+          <div class="circle c-drift"><span class="dot"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 눈금자: 빨간 마커가 아주 천천히 이동 -->
+    <div class="ruler reveal" style="--d: 0.9s" aria-hidden="true">
+      <span class="marker"></span>
+      <span class="num n0">0</span>
+      <span class="num n50">50</span>
+      <span class="num n100">100</span>
+    </div>
+
+    <!-- 제목 -->
+    <h1 class="title">
+      <span class="reveal" style="--d: 0.3s">ANIMAL MOTION</span>
+      <span class="reveal outline" style="--d: 0.45s">STUDY</span>
+    </h1>
+
+    <!-- 오른쪽 정보 영역 -->
+    <section class="side">
+      <h2 class="reveal" style="--d: 0.6s">An Exploration of Movement</h2>
+      <p class="description reveal" style="--d: 0.75s">
+        Exploring the rhythm, direction, and behavior of natural movement through geometric forms.
+      </p>
+      <div class="info reveal" style="--d: 0.9s">
+        <div class="row"><span>DATE</span><b>DEC 10, 2026</b></div>
+        <div class="row"><span>TIME</span><b>10:00 AM – 06:00 PM</b></div>
+        <div class="row"><span>PLACE</span><b>DIGITAL ART EXHIBITION</b></div>
+      </div>
+    </section>
+
+    <!-- 하단 바 -->
+    <footer class="bottom reveal" style="--d: 1s">
+      <p>ORGANIZED BY MYONGJI UNIVERSITY</p>
+      <p>CLICK A CIRCLE TO DISPLACE ±100 PX</p>
+    </footer>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
