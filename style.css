@@ -1,0 +1,323 @@
+/* ===== 기본 설정 ===== */
+:root {
+  --bg: #121110;                         /* 따뜻한 검정 */
+  --bone: #ede9e0;                       /* 종이 같은 흰색 */
+  --red: #ff4a1c;                        /* 포인트 컬러 (딱 하나만 사용) */
+  --line: rgba(237, 233, 224, 0.22);     /* 얇은 선 */
+  --grid: rgba(237, 233, 224, 0.05);     /* 배경 격자 */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;            /* 불필요한 스크롤 방지 */
+  background: var(--bg);
+  color: var(--bone);
+  font-family: Arial, sans-serif;
+}
+
+/* ===== 포스터 무대: 1920 x 1080 고정, JS로 화면에 맞게 scale ===== */
+.stage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1920px;
+  height: 1080px;
+  background-color: var(--bg);
+  /* 12칸 세로 격자선 */
+  background-image: repeating-linear-gradient(90deg, var(--grid) 0, var(--grid) 1px, transparent 1px, transparent 160px);
+  transform-origin: center center;
+  transform: translate(-50%, -50%) scale(var(--scale, 1));
+}
+
+/* ===== 등장 애니메이션: 아래에서 살짝 올라오며 나타남 ===== */
+.reveal {
+  opacity: 0;
+  animation: rise 0.9s ease-out var(--d, 0s) forwards;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== 상단 / 하단 바 ===== */
+.top,
+.bottom {
+  position: absolute;
+  left: 100px;
+  right: 100px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  letter-spacing: 0.18em;
+}
+.top    { top: 56px;    padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.bottom { bottom: 50px; padding-top: 20px;    border-top: 1px solid var(--line); }
+
+/* ===== 배경에 떠다니는 점들 ===== */
+.field {
+  position: absolute;
+  top: 130px;
+  left: 100px;
+  width: 1720px;
+  height: 480px;
+  pointer-events: none;
+}
+.field i {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bone);
+  opacity: 0.35;
+  animation: fieldMove var(--dur) ease-in-out var(--delay) infinite alternate;
+}
+@keyframes fieldMove {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(var(--dx), var(--dy)); }
+}
+
+/* ===== 메인 그래픽 영역 ===== */
+.graphic {
+  position: absolute;
+  top: 150px;
+  left: 0;
+  width: 100%;
+  height: 450px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 250px;
+}
+
+/* 원들이 놓인 가로 기준선 (점선) */
+.axis {
+  position: absolute;
+  top: 225px;
+  left: 100px;
+  right: 100px;
+  border-top: 1px dashed var(--line);
+}
+
+.slot {
+  position: relative;
+  width: 150px;
+  height: 150px;
+}
+
+/* 인터랙션 담당 요소: 클릭 시 위치(transform)만 바뀜 */
+.circle-move {
+  position: relative;
+  z-index: 2;
+  width: 150px;
+  height: 150px;
+  cursor: pointer;
+  transition: transform 0.9s ease-in-out;
+  outline-offset: 14px;
+}
+
+/* ===== 원: 기본 애니메이션이 이 요소의 transform을 담당 =====
+   세 원은 같은 6초 주기를 공유하고 시작 지점만 다름 (물결이 지나가는 느낌) */
+.circle {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  animation-duration: 6s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* 원 안의 작은 점: 본체와 반대 방향으로 흔들림 */
+.dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 50%;
+  animation: dotShift 6s ease-in-out infinite;
+}
+
+/* 원 1: 뼈색 채움 / Pulse 중심 */
+.c-pulse { background: var(--bone); animation-name: pulse; }
+.c-pulse .dot { background: var(--bg); }
+
+/* 원 2: 빨강 채움 / Float 중심 */
+.c-float { background: var(--red); animation-name: float; animation-delay: -2s; }
+.c-float .dot { background: var(--bone); animation-delay: -2s; }
+
+/* 원 3: 속이 빈 원 / Drift 중심 (배경색으로 채워 점선을 가림) */
+.c-drift {
+  background: var(--bg);
+  border: 2px solid var(--bone);
+  animation-name: drift;
+  animation-delay: -4s;
+}
+.c-drift .dot { background: var(--bone); animation-delay: -4s; }
+
+/* Pulse가 중심: 수축 → 팽창, 위치도 살짝 흔들림 */
+@keyframes pulse {
+  0%   { transform: translate(0, 0)     scale(1);    }
+  30%  { transform: translate(6px, -14px) scale(0.72); }
+  65%  { transform: translate(12px, -4px) scale(1.14); }
+  100% { transform: translate(0, 0)     scale(1);    }
+}
+
+/* Float가 중심: 위로 떠올랐다 내려옴 */
+@keyframes float {
+  0%   { transform: translate(0, 0)      scale(1);    }
+  50%  { transform: translate(14px, -48px) scale(1.06); }
+  100% { transform: translate(0, 0)      scale(1);    }
+}
+
+/* Drift가 중심: 좌우로 천천히 이동 */
+@keyframes drift {
+  0%   { transform: translate(-44px, 6px)  scale(1);    }
+  50%  { transform: translate(44px, -10px) scale(0.94); }
+  100% { transform: translate(-44px, 6px)  scale(1);    }
+}
+
+@keyframes dotShift {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(-9px, 8px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ===== 원 아래 라벨 ===== */
+.label {
+  position: absolute;
+  top: 215px;
+  left: 0;
+  width: 220px;
+  font-size: 16px;
+  letter-spacing: 0.14em;
+}
+.label .name { font-size: 20px; font-weight: bold; }
+.label .sub  { margin-top: 8px; opacity: 0.6; }
+.label .read { margin-top: 10px; color: var(--red); }
+
+/* ===== 클릭 시 남는 잔상 링 (script.js가 만들어 줌) ===== */
+.ghost {
+  position: absolute;
+  z-index: 1;
+  width: 150px;
+  height: 150px;
+  border: 1px solid var(--bone);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: ghostFade 1.6s ease-out forwards;
+}
+@keyframes ghostFade {
+  from { opacity: 0.7; transform: scale(1); }
+  to   { opacity: 0;   transform: scale(1.5); }
+}
+
+/* ===== 눈금자 ===== */
+.ruler {
+  position: absolute;
+  top: 612px;
+  left: 100px;
+  width: 1720px;
+  height: 18px;
+  border-right: 1px solid var(--bone);
+  background:
+    linear-gradient(90deg, var(--bone) 1px, transparent 1px) 0 0 / 172px 18px repeat-x,
+    linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 17.2px 9px repeat-x;
+}
+.num {
+  position: absolute;
+  top: 26px;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+}
+.n0   { left: 0; }
+.n50  { left: 50%; transform: translateX(-50%); }
+.n100 { right: 0; }
+
+/* 눈금자 위를 아주 천천히 흐르는 빨간 마커 (Drift) */
+.marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 18px;
+  background: var(--red);
+  animation: markerDrift 16s ease-in-out infinite alternate;
+}
+@keyframes markerDrift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(1718px); }
+}
+
+/* ===== 제목 ===== */
+.title {
+  position: absolute;
+  left: 100px;
+  top: 690px;
+  font-size: 112px;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+.title span { display: block; }
+.title .outline {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--bone);   /* 속이 빈 글자 */
+}
+
+/* ===== 오른쪽 정보 영역 ===== */
+.side {
+  position: absolute;
+  left: 1240px;
+  top: 690px;
+  width: 580px;
+}
+.side h2 {
+  font-size: 34px;
+  font-weight: normal;
+  color: var(--red);
+}
+.description {
+  margin-top: 18px;
+  font-size: 20px;
+  line-height: 1.55;
+}
+.info {
+  margin-top: 26px;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  font-size: 20px;
+}
+.row span {
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  opacity: 0.6;
+}
+
+/* ===== 접근성: 움직임 감소 설정 ===== */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .circle,
+  .dot,
+  .marker,
+  .field i {
+    animation: none;
+  }
+  .reveal { opacity: 1; }
+  .circle-move { transition: none; }
+  .ghost { display: none; }
+}
